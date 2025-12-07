@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* FIX 1: Image too big */
+        .emp-photo {
+            width: 55px;
+            height: 55px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        /* FIX 2: Table clean */
+        .table-wrap {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            white-space: nowrap; /* keep row tidy */
+        }
+
+        th {
+            font-weight: 600;
+            background: #f7f9fc;
+        }
+
+        /* Buttons inside table */
+        .btn-small {
+            padding: 4px 10px;
+            font-size: 12px;
+            border-radius: 5px;
+        }
+
+        .btn-edit {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-del {
+            background: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+<div class="page-wrap">
+    <div class="card">
+
+        <!-- Header -->
+        <div class="title-main">
+            Hello, {{ admin.name }} 👋
+        </div>
+        <p class="subtitle">
+            Dashboard • Manage employees • Admin ID: <strong>{{ admin_code }}</strong>
+        </p>
+
+        <!-- Flash messages -->
+        <div class="flash-area">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, msg in messages %}
+                  <div class="flash flash-{{ category }}">{{ msg }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Search + Add employee -->
+        <div class="btn-row" style="justify-content: space-between;">
+            <form method="GET" style="flex:1; margin-right:10px;">
+                <input class="input" type="text" name="q" placeholder="Search employees..."
+                       value="{{ q }}">
+            </form>
+
+            <a class="btn btn-primary" href="{{ url_for('admin_add_employee') }}">
+                + Add Employee
+            </a>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Alt Phone</th>
+                    <th>Relation</th>
+                    <th>Marital</th>
+                    <th>Blood</th>
+                    <th>Gender</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Address</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% if employees %}
+                    {% for e in employees %}
+                        <tr>
+                            <td>
+                                {% if e.photo %}
+                                    <img src="{{ url_for('uploads', filename=e.photo) }}" class="emp-photo">
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>{{ e.name }}</td>
+                            <td>{{ e.email }}</td>
+                            <td>{{ e.phone }}</td>
+                            <td>{{ e.alt_phone }}</td>
+                            <td>{{ e.alt_relation }}</td>
+                            <td>{{ e.marital_status }}</td>
+                            <td>{{ e.blood_group }}</td>
+                            <td>{{ e.gender }}</td>
+                            <td>{{ e.city }}</td>
+                            <td>{{ e.state }}</td>
+                            <td>{{ e.address }}</td>
+
+                            <td>
+                                <a class="btn-small btn-edit"
+                                   href="{{ url_for('admin_edit_employee', emp_id=e.id) }}">
+                                   Edit
+                                </a>
+
+                                <a class="btn-small btn-del"
+                                   href="{{ url_for('admin_delete_employee', emp_id=e.id) }}"
+                                   onclick="return confirm('Delete employee?');">
+                                   Delete
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="13" style="text-align:center; padding:25px; color:#777;">
+                            No employees yet.
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <br>
+
+        <!-- Delete company + Logout -->
+        <div class="btn-row">
+            <form action="{{ url_for('admin_delete_company') }}" method="POST"
+                  onsubmit="return confirm('This will delete company + all employees. Continue?');">
+                <button class="btn btn-danger">❌ Delete Profile & Company</button>
+            </form>
+
+            <a class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+
+        <div class="footer">
+            Created by <span>Gurudeep Soni</span> ✨
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Company – Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="page-wrap">
+    <div class="card">
+        <div class="title-main">Create New Company</div>
+        <p class="subtitle">Register a company and its first admin. An Admin ID will be generated from the admin name + phone.</p>
+
+        <div class="flash-area">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, msg in messages %}
+                  <div class="flash flash-{{ category }}">{{ msg }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        <form method="POST">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Company Name</label>
+                    <input type="text" name="company_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Admin Name</label>
+                    <input type="text" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Admin Email</label>
+                    <input type="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Admin Phone</label>
+                    <input type="tel" name="phone" required>
+                    <div class="helper">Used to generate the Admin ID.</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Admin Password</label>
+                    <input type="password" name="password" required>
+                </div>
+            </div>
+
+            <div class="btn-row" style="margin-top: 18px;">
+                <button class="btn btn-primary" type="submit">Create Company &amp; Admin</button>
+                <a class="btn btn-secondary" href="{{ url_for('home') }}">Back Home</a>
+            </div>
+        </form>
+
+        <div class="footer">
+            Created by <span>Gurudeep Soni</span> ✨
+        </div>
+    </div>
+</div>
+</body>
+</html>

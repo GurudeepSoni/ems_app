@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Update Profile</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="page">
+  <div class="card center small">
+    <h2>Edit Profile</h2>
+    <form method="post" enctype="multipart/form-data">
+      <label>Name</label><input name="name" value="{{ emp.name }}" required>
+      <label>Phone</label><input name="phone" value="{{ emp.phone }}">
+      <label>Alt Phone</label><input name="alt_phone" value="{{ emp.alt_phone }}">
+      <label>Relation</label><input name="alt_relation" value="{{ emp.alt_relation }}">
+      <label>Address</label><textarea name="address">{{ emp.address }}</textarea>
+      <label>Change Photo</label><input type="file" name="photo">
+      <button class="btn" type="submit">Save</button>
+    </form>
+    <a href="{{ url_for('employee_dashboard') }}">Back</a>
+  </div>
+</body>
+</html>

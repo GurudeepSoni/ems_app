@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Company Created</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 40px;
+        }
+
+        .box {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .id-box {
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 18px;
+            margin-top: 15px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <h2>Company Created Successfully 🎉</h2>
+
+        <p><b>Company Name:</b> {{ company.name }}</p>
+        <p><b>Admin Email:</b> {{ company.admin.email }}</p>
+
+        <div class="id-box">
+            Your Admin ID: <b>{{ company.admin.id }}</b>
+        </div>
+
+        <br>
+        <p>Use this Admin ID for login and managing employees.</p>
+
+        <a href="/admin/login">Go to Admin Login</a>
+    </div>
+</body>
+</html>
