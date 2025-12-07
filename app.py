@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 import uuid
 import random
@@ -30,9 +33,10 @@ app.secret_key = "super-secret-key-change-me"
 
 # PostgreSQL config
 # password gunnu@123  =>  gunnu%40123 (URL encoded)
-app.config[
-    "SQLALCHEMY_DATABASE_URI"
-] = "postgresql://postgres:gunnu%40123@localhost:5432/ems_db"
+
+
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # upload folder
@@ -633,3 +637,4 @@ def uploads(filename):
 if __name__ == "__main__":
     # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
+
