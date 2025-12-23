@@ -176,24 +176,20 @@ def send_otp_email(to_email, otp):
     try:
         resend.Emails.send({
             "from": "EMS <emsappforall@gmail.com>",
-            "to": to_email,
+            "to": [to_email],
             "subject": "EMS Password Reset OTP",
             "html": f"""
-                <div style="font-family:Arial,sans-serif">
-                    <h2>Password Reset OTP</h2>
-                    <p>Your OTP is:</p>
-                    <h1 style="letter-spacing:3px">{otp}</h1>
-                    <p>This OTP is valid for <b>5 minutes</b>.</p>
-                    <p>If you didn’t request this, ignore this email.</p>
-                    <br>
-                    <p>— EMS Team</p>
-                </div>
+                <h2>Password Reset OTP</h2>
+                <p>Your OTP is:</p>
+                <h1>{otp}</h1>
+                <p>This OTP is valid for 5 minutes.</p>
             """
         })
         return True
     except Exception as e:
-        print("❌ Resend Email Error:", e)
+        print("❌ Resend error:", e)
         return False
+
 
 
 
@@ -687,6 +683,7 @@ def uploads(filename):
 if __name__ == "__main__":
     # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
+
 
 
 
