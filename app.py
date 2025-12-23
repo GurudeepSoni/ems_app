@@ -122,30 +122,48 @@ def generate_otp(length: int = 6) -> str:
     return "".join(str(random.randint(0, 9)) for _ in range(length))
 
 
-def send_otp_email(to_email: str, otp: str) -> bool:
-    """Send OTP email using Gmail SMTP."""
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def send_otp_email(to_email, otp):
     if not EMAIL_USER or not EMAIL_PASS:
-        print("EMAIL_USER or EMAIL_PASS not set in .env")
+        print("❌ Email credentials missing")
         return False
 
-    msg = EmailMessage()
-    msg["Subject"] = "EMS Password Reset OTP"
+    subject = "EMS Password Reset OTP"
+    body = f"""
+Hello,
+
+Your OTP for password reset is:
+
+🔐 {otp}
+
+This OTP is valid for 5 minutes.
+Do not share it with anyone.
+
+— EMS Team
+"""
+
+    msg = MIMEMultipart()
     msg["From"] = EMAIL_USER
     msg["To"] = to_email
-    msg.set_content(
-        f"Your OTP for resetting your EMS password is: {otp}\n\n"
-        "This code is valid for a short time. If you did not request this, please ignore this email."
-    )
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain"))
 
     try:
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            server.login(EMAIL_USER, EMAIL_PASS)
-            server.send_message(msg)
+        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(EMAIL_USER, EMAIL_PASS)
+        server.send_message(msg)
+        server.quit()
         return True
     except Exception as e:
-        print("Error sending email:", e)
+        print("❌ Email send error:", e)
         return False
+
 
 
 # ---------- ROUTES ----------
@@ -637,6 +655,7 @@ def uploads(filename):
 if __name__ == "__main__":
     # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
+
 
 
 
