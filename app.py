@@ -175,7 +175,7 @@ import os
 def send_otp_email(to_email, otp):
     try:
         resend.Emails.send({
-            "from": "EMS <emsappforall@gmail.com>",
+            "from": "EMS <onboarding@gmail.com>",
             "to": [to_email],
             "subject": "EMS Password Reset OTP",
             "html": f"""
@@ -683,6 +683,7 @@ def uploads(filename):
 if __name__ == "__main__":
     # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
+
 
 
 
