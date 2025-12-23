@@ -21,6 +21,8 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+import resend 
+
 
 # ---------- CONFIG ----------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -48,8 +50,10 @@ ALLOWED_EXT = {"png", "jpg", "jpeg", "gif"}
 db = SQLAlchemy(app)
 
 # Email credentials from .env
-EMAIL_USER = os.getenv("MAIL_USERNAME")
-EMAIL_PASS = os.getenv("MAIL_PASSWORD")
+##EMAIL_USER = os.getenv("MAIL_USERNAME")
+##EMAIL_PASS = os.getenv("MAIL_PASSWORD")
+resend.api_key = os.getenv("RESEND_API_KEY")
+
 
 
 # ---------- MODELS ----------
@@ -122,51 +126,75 @@ def generate_otp(length: int = 6) -> str:
     return "".join(str(random.randint(0, 9)) for _ in range(length))
 
 
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+##import smtplib
+##from email.mime.text import MIMEText
+##from email.mime.multipart import MIMEMultipart
 import resend
 import os
 
 res
 
+# def send_otp_email(to_email, otp):
+#     if not EMAIL_USER or not EMAIL_PASS:
+#         print("❌ Email credentials missing")
+#         return False
+
+#     subject = "EMS Password Reset OTP"
+#     body = f"""
+# Hello,
+
+# Your OTP for password reset is:
+
+# 🔐 {otp}
+
+# This OTP is valid for 5 minutes.
+# Do not share it with anyone.
+
+# — EMS Team
+# """
+
+#     msg = MIMEMultipart()
+#     msg["From"] = EMAIL_USER
+#     msg["To"] = to_email
+#     msg["Subject"] = subject
+#     msg.attach(MIMEText(body, "plain"))
+
+#     try:
+#         server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
+#         server.ehlo()
+#         server.starttls()
+#         server.ehlo()
+#         server.login(EMAIL_USER, EMAIL_PASS)
+#         server.send_message(msg)
+#         server.quit()
+#         return True
+#     except Exception as e:
+#         print("❌ Email send error:", e)
+#         return False
+
 def send_otp_email(to_email, otp):
-    if not EMAIL_USER or not EMAIL_PASS:
-        print("❌ Email credentials missing")
-        return False
-
-    subject = "EMS Password Reset OTP"
-    body = f"""
-Hello,
-
-Your OTP for password reset is:
-
-🔐 {otp}
-
-This OTP is valid for 5 minutes.
-Do not share it with anyone.
-
-— EMS Team
-"""
-
-    msg = MIMEMultipart()
-    msg["From"] = EMAIL_USER
-    msg["To"] = to_email
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
-
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=10)
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(EMAIL_USER, EMAIL_PASS)
-        server.send_message(msg)
-        server.quit()
+        resend.Emails.send({
+            "from": "EMS <onboarding@resend.dev>",
+            "to": to_email,
+            "subject": "EMS Password Reset OTP",
+            "html": f"""
+                <div style="font-family:Arial,sans-serif">
+                    <h2>Password Reset OTP</h2>
+                    <p>Your OTP is:</p>
+                    <h1 style="letter-spacing:3px">{otp}</h1>
+                    <p>This OTP is valid for <b>5 minutes</b>.</p>
+                    <p>If you didn’t request this, ignore this email.</p>
+                    <br>
+                    <p>— EMS Team</p>
+                </div>
+            """
+        })
         return True
     except Exception as e:
-        print("❌ Email send error:", e)
+        print("❌ Resend Email Error:", e)
         return False
+
 
 
 
@@ -659,6 +687,7 @@ def uploads(filename):
 if __name__ == "__main__":
     # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
+
 
 
 
