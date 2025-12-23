@@ -48,8 +48,8 @@ ALLOWED_EXT = {"png", "jpg", "jpeg", "gif"}
 db = SQLAlchemy(app)
 
 # Email credentials from .env
-MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+EMAIL_USER = os.getenv("MAIL_USERNAME")
+EMAIL_PASS = os.getenv("MAIL_PASSWORD")
 
 
 # ---------- MODELS ----------
@@ -637,5 +637,6 @@ def uploads(filename):
 if __name__ == "__main__":
     # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
+
 
 
