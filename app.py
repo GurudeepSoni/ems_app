@@ -22,7 +22,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 import resend 
-
+print("RESEND KEY LOADED:", bool(os.getenv("RESEND_API_KEY")))
 
 # ---------- CONFIG ----------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -689,6 +689,7 @@ def uploads(filename):
 if __name__ == "__main__":
     # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
+
 
 
 
