@@ -125,6 +125,10 @@ def generate_otp(length: int = 6) -> str:
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import resend
+import os
+
+res
 
 def send_otp_email(to_email, otp):
     if not EMAIL_USER or not EMAIL_PASS:
@@ -655,6 +659,7 @@ def uploads(filename):
 if __name__ == "__main__":
     # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
+
 
 
 
