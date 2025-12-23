@@ -18,4 +18,6 @@ gunicorn
 Werkzeug
 Flask-Mail
 python-dotenv
+resend
+
 
