@@ -4,9 +4,9 @@ load_dotenv()
 import os
 import uuid
 import random
-import smtplib
-import ssl
-from email.message import EmailMessage
+##port smtplib
+##import ssl
+##from email.message import EmailMessage
 from flask import (
     Flask,
     render_template,
@@ -687,6 +687,7 @@ def uploads(filename):
 if __name__ == "__main__":
     # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
+
 
 
 
