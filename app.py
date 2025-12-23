@@ -172,17 +172,23 @@ import os
 #         print("❌ Email send error:", e)
 #         return False
 
+import resend
+import os
+
+resend.api_key = os.getenv("RESEND_API_KEY")
+
 def send_otp_email(to_email, otp):
     try:
         resend.Emails.send({
-            "from": "EMS <onboarding@gmail.com>",
-            "to": [to_email],
+            "from": "EMS <onboarding@resend.dev>",
+            "to": to_email,
             "subject": "EMS Password Reset OTP",
             "html": f"""
-                <h2>Password Reset OTP</h2>
+                <h2>Password Reset</h2>
                 <p>Your OTP is:</p>
                 <h1>{otp}</h1>
                 <p>This OTP is valid for 5 minutes.</p>
+                <p>— EMS Team</p>
             """
         })
         return True
@@ -683,6 +689,7 @@ def uploads(filename):
 if __name__ == "__main__":
     # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
+
 
 
 
