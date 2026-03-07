@@ -630,3 +630,7 @@ def uploads(filename):
 if __name__ == "__main__":
     # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
+
+
+with app.app_context():
+    db.create_all()
