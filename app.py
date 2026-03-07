@@ -31,6 +31,10 @@ app.secret_key = os.environ.get("SECRET_KEY")
 # password gunnu@123  =>  gunnu%40123 (URL encoded)
 DATABASE_URL = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_pre_ping": True,
+    "pool_recycle": 300,
+}
 
 # upload folder
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
@@ -634,4 +638,5 @@ if __name__ == "__main__":
 
 with app.app_context():
     db.create_all()
+
 
