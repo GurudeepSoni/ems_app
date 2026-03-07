@@ -26,15 +26,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 app = Flask(__name__)
-
-# secret key from environment
 app.secret_key = os.environ.get("SECRET_KEY")
-
-# PostgreSQL config (Render will provide DATABASE_URL)
+# PostgreSQL config
+# password gunnu@123  =>  gunnu%40123 (URL encoded)
 DATABASE_URL = os.environ.get("DATABASE_URL")
-
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # upload folder
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
@@ -44,7 +40,7 @@ ALLOWED_EXT = {"png", "jpg", "jpeg", "gif"}
 
 db = SQLAlchemy(app)
 
-# Email credentials from environment
+# Email credentials from .env
 EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASS = os.getenv("EMAIL_PASS")
 
@@ -85,6 +81,14 @@ def allowed_file(filename: str) -> bool:
 
 
 def generate_admin_code(name: str, phone: str) -> str:
+    """
+    Rule:
+      - lowercase
+      - first 4 letters of name
+      - '@'
+      - last 4 digits of phone
+    Example: name='Missunderstand', phone='9876543210' -> 'miss@3210'
+    """
     name_part = name.strip().lower()[:4] if name else "admin"
     digits = "".join(ch for ch in phone if ch.isdigit()) if phone else ""
     phone_part = digits[-4:] if len(digits) >= 4 else digits
@@ -112,8 +116,9 @@ def generate_otp(length: int = 6) -> str:
 
 
 def send_otp_email(to_email: str, otp: str) -> bool:
+    """Send OTP email using Gmail SMTP."""
     if not EMAIL_USER or not EMAIL_PASS:
-        print("EMAIL_USER or EMAIL_PASS not set")
+        print("EMAIL_USER or EMAIL_PASS not set in .env")
         return False
 
     msg = EmailMessage()
@@ -143,7 +148,7 @@ def home():
     return render_template("home.html")
 
 
-# ---- COMPANY / ADMIN REGISTRATION ----
+# ---- OPTION A: COMPANY / ADMIN REGISTRATION ----
 @app.route("/create_company", methods=["GET", "POST"])
 def create_company():
     if request.method == "POST":
@@ -157,12 +162,14 @@ def create_company():
             flash("Please fill all fields.", "danger")
             return redirect(url_for("create_company"))
 
+        # check email unique
         if Admin.query.filter_by(email=email).first():
             flash("Admin email already exists.", "danger")
             return redirect(url_for("create_company"))
 
         password_hashed = generate_password_hash(password_raw)
 
+        # generate admin code from name + phone
         admin_code = generate_admin_code(name, phone)
 
         new_admin = Admin(
@@ -176,7 +183,7 @@ def create_company():
         db.session.commit()
 
         flash("Company & Admin created successfully!", "success")
-
+        # show admin code, email, company name on success page
         return render_template(
             "company_success.html",
             admin=new_admin,
@@ -226,6 +233,7 @@ def admin_dashboard():
         )
     employees = query.order_by(Employee.id.desc()).all()
 
+    # compute admin_code again for display
     admin_code = generate_admin_code(admin.name, admin.phone)
 
     return render_template(
@@ -237,7 +245,7 @@ def admin_dashboard():
     )
 
 
-# ---- ADMIN ADD EMPLOYEE ----
+# ---- ADMIN: ADD EMPLOYEE ----
 @app.route("/admin_add_employee", methods=["GET", "POST"])
 def admin_add_employee():
     admin = current_admin()
@@ -249,10 +257,22 @@ def admin_add_employee():
         name = request.form.get("name")
         email = request.form.get("email")
         phone = request.form.get("phone")
+        alt_phone = request.form.get("alt_phone")
+        alt_relation = request.form.get("alt_relation")
+        marital_status = request.form.get("marital_status")
+        blood_group = request.form.get("blood_group")
+        gender = request.form.get("gender")
+        city = request.form.get("city")
+        state = request.form.get("state")
+        address = request.form.get("address")
         password_raw = request.form.get("password")
 
         if not (name and email and password_raw):
             flash("Name, Email, Password are required.", "danger")
+            return redirect(url_for("admin_add_employee"))
+
+        if Employee.query.filter_by(email=email).first():
+            flash("Employee email already exists.", "danger")
             return redirect(url_for("admin_add_employee"))
 
         photo = request.files.get("photo")
@@ -267,43 +287,254 @@ def admin_add_employee():
             name=name,
             email=email,
             phone=phone,
+            alt_phone=alt_phone,
+            alt_relation=alt_relation,
+            marital_status=marital_status,
+            blood_group=blood_group,
+            gender=gender,
+            city=city,
+            state=state,
+            address=address,
             photo=filename,
             password=generate_password_hash(password_raw),
         )
-
         db.session.add(emp)
         db.session.commit()
-
         flash("Employee added successfully.", "success")
         return redirect(url_for("admin_dashboard"))
 
     return render_template("admin_add_employee.html", admin=admin)
 
 
-# ---- FORGOT PASSWORD (OTP) ----
+# ---- ADMIN: EDIT EMPLOYEE ----
+@app.route("/admin_edit_employee/<int:emp_id>", methods=["GET", "POST"])
+def admin_edit_employee(emp_id):
+    admin = current_admin()
+    if not admin:
+        flash("Please login as admin.", "danger")
+        return redirect(url_for("admin_login"))
+
+    emp = Employee.query.get_or_404(emp_id)
+    if emp.admin_id != admin.admin_id:
+        flash("You cannot edit employees from another admin.", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    if request.method == "POST":
+        emp.name = request.form.get("name")
+        emp.phone = request.form.get("phone")
+        emp.alt_phone = request.form.get("alt_phone")
+        emp.alt_relation = request.form.get("alt_relation")
+        emp.marital_status = request.form.get("marital_status")
+        emp.blood_group = request.form.get("blood_group")
+        emp.gender = request.form.get("gender")
+        emp.city = request.form.get("city")
+        emp.state = request.form.get("state")
+        emp.address = request.form.get("address")
+
+        photo = request.files.get("photo")
+        if photo and allowed_file(photo.filename):
+            safe_name = f"{uuid.uuid4().hex}_{photo.filename}"
+            emp.photo = safe_name
+            photo.save(os.path.join(app.config["UPLOAD_FOLDER"], safe_name))
+
+        db.session.commit()
+        flash("Employee updated.", "success")
+        return redirect(url_for("admin_dashboard"))
+
+    return render_template("admin_edit_employee.html", admin=admin, emp=emp)
+
+
+# ---- ADMIN: DELETE EMPLOYEE ----
+@app.route("/admin_delete_employee/<int:emp_id>")
+def admin_delete_employee(emp_id):
+    admin = current_admin()
+    if not admin:
+        flash("Please login as admin.", "danger")
+        return redirect(url_for("admin_login"))
+
+    emp = Employee.query.get_or_404(emp_id)
+    if emp.admin_id != admin.admin_id:
+        flash("You cannot delete employees from another admin.", "danger")
+        return redirect(url_for("admin_dashboard"))
+
+    db.session.delete(emp)
+    db.session.commit()
+    flash("Employee deleted.", "info")
+    return redirect(url_for("admin_dashboard"))
+
+
+# ---- ADMIN: DELETE COMPANY + ADMIN + EMPLOYEES ----
+@app.route("/admin_delete_company", methods=["POST"])
+def admin_delete_company():
+    admin = current_admin()
+    if not admin:
+        flash("Please login as admin.", "danger")
+        return redirect(url_for("admin_login"))
+
+    # delete all employees under this admin
+    Employee.query.filter_by(admin_id=admin.admin_id).delete()
+    # delete admin record
+    db.session.delete(admin)
+    db.session.commit()
+
+    session.clear()
+    flash("Company, admin profile and all employees deleted.", "info")
+    return redirect(url_for("home"))
+
+
+# ---- EMPLOYEE REGISTRATION (OPTION 2) ----
+@app.route("/employee_register", methods=["GET", "POST"])
+def employee_register():
+    if request.method == "POST":
+        admin_code = request.form.get("admin_code")
+        name = request.form.get("name")
+        email = request.form.get("email")
+        phone = request.form.get("phone")
+        alt_phone = request.form.get("alt_phone")
+        alt_relation = request.form.get("alt_relation")
+        marital_status = request.form.get("marital_status")
+        blood_group = request.form.get("blood_group")
+        gender = request.form.get("gender")
+        city = request.form.get("city")
+        state = request.form.get("state")
+        address = request.form.get("address")
+        password_raw = request.form.get("password")
+
+        if not (admin_code and name and email and password_raw):
+            flash("Admin ID, Name, Email, Password are required.", "danger")
+            return redirect(url_for("employee_register"))
+
+        # find admin by generating code for each admin and matching
+        admins = Admin.query.all()
+        matched_admin = None
+        for a in admins:
+            if generate_admin_code(a.name, a.phone) == admin_code.strip().lower():
+                matched_admin = a
+                break
+
+        if not matched_admin:
+            flash("Invalid Admin ID.", "danger")
+            return redirect(url_for("employee_register"))
+
+        if Employee.query.filter_by(email=email).first():
+            flash("Email already registered.", "danger")
+            return redirect(url_for("employee_register"))
+
+        photo = request.files.get("photo")
+        filename = None
+        if photo and allowed_file(photo.filename):
+            safe_name = f"{uuid.uuid4().hex}_{photo.filename}"
+            filename = safe_name
+            photo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
+        emp = Employee(
+            admin_id=matched_admin.admin_id,
+            name=name,
+            email=email,
+            phone=phone,
+            alt_phone=alt_phone,
+            alt_relation=alt_relation,
+            marital_status=marital_status,
+            blood_group=blood_group,
+            gender=gender,
+            city=city,
+            state=state,
+            address=address,
+            photo=filename,
+            password=generate_password_hash(password_raw),
+        )
+        db.session.add(emp)
+        db.session.commit()
+        flash("Registration successful. Please login as employee.", "success")
+        return redirect(url_for("employee_login"))
+
+    return render_template("employee_register.html")
+
+
+# ---- EMPLOYEE LOGIN ----
+@app.route("/employee_login", methods=["GET", "POST"])
+def employee_login():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password_raw = request.form.get("password")
+
+        emp = Employee.query.filter_by(email=email).first()
+        if emp and check_password_hash(emp.password, password_raw):
+            session.clear()
+            session["employee_id"] = emp.id
+            flash("Logged in as employee.", "success")
+            return redirect(url_for("employee_dashboard"))
+
+        flash("Invalid employee credentials.", "danger")
+    return render_template("employee_login.html")
+
+
+# ---- EMPLOYEE DASHBOARD ----
+@app.route("/employee_dashboard")
+def employee_dashboard():
+    emp = current_employee()
+    if not emp:
+        flash("Please login as employee.", "danger")
+        return redirect(url_for("employee_login"))
+    return render_template("employee_dashboard.html", emp=emp)
+
+
+# ---- EMPLOYEE EDIT PROFILE ----
+@app.route("/employee_edit", methods=["GET", "POST"])
+def employee_edit():
+    emp = current_employee()
+    if not emp:
+        flash("Please login as employee.", "danger")
+        return redirect(url_for("employee_login"))
+
+    if request.method == "POST":
+        emp.name = request.form.get("name")
+        emp.phone = request.form.get("phone")
+        emp.alt_phone = request.form.get("alt_phone")
+        emp.alt_relation = request.form.get("alt_relation")
+        emp.marital_status = request.form.get("marital_status")
+        emp.blood_group = request.form.get("blood_group")
+        emp.gender = request.form.get("gender")
+        emp.city = request.form.get("city")
+        emp.state = request.form.get("state")
+        emp.address = request.form.get("address")
+
+        photo = request.files.get("photo")
+        if photo and allowed_file(photo.filename):
+            safe_name = f"{uuid.uuid4().hex}_{photo.filename}"
+            emp.photo = safe_name
+            photo.save(os.path.join(app.config["UPLOAD_FOLDER"], safe_name))
+
+        db.session.commit()
+        flash("Profile updated.", "success")
+        return redirect(url_for("employee_dashboard"))
+
+    return render_template("employee_edit.html", emp=emp)
+
+
+# ---- FORGOT PASSWORD (REQUEST OTP) ----
 @app.route("/forgot_password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
         email = request.form.get("email")
-        role = request.form.get("role")
+        role = request.form.get("role")  # 'admin' or 'employee'
 
-        user = (
-            Admin.query.filter_by(email=email).first()
-            if role == "admin"
-            else Employee.query.filter_by(email=email).first()
-        )
+        if role == "admin":
+            user = Admin.query.filter_by(email=email).first()
+        else:
+            user = Employee.query.filter_by(email=email).first()
 
         if not user:
             flash("No account found with that email.", "danger")
             return redirect(url_for("forgot_password"))
 
-        otp = generate_otp()
+        otp = generate_otp(6)
         sent = send_otp_email(email, otp)
-
         if not sent:
-            flash("Failed to send OTP email.", "danger")
+            flash("Failed to send OTP email. Check email settings.", "danger")
             return redirect(url_for("forgot_password"))
 
+        # store reset info in session
         session["reset_email"] = email
         session["reset_role"] = role
         session["reset_otp"] = otp
@@ -311,20 +542,27 @@ def forgot_password():
         flash("OTP sent to your email.", "success")
         return redirect(url_for("verify_otp"))
 
-    return render_template("forgot_password.html")
+    # allow pre-select role via query param
+    role = request.args.get("role", "employee")
+    return render_template("forgot_password.html", role=role)
 
 
 # ---- VERIFY OTP ----
 @app.route("/verify_otp", methods=["GET", "POST"])
 def verify_otp():
-    if request.method == "POST":
-        entered = request.form.get("otp")
+    if "reset_email" not in session or "reset_otp" not in session:
+        flash("Password reset session expired. Try again.", "danger")
+        return redirect(url_for("forgot_password"))
 
+    if request.method == "POST":
+        entered = request.form.get("otp", "").strip()
         if entered == session.get("reset_otp"):
             session["reset_verified"] = True
+            flash("OTP verified. Please set a new password.", "success")
             return redirect(url_for("reset_password"))
-
-        flash("Invalid OTP", "danger")
+        else:
+            flash("Invalid OTP. Please try again.", "danger")
+            return redirect(url_for("verify_otp"))
 
     return render_template("verify_otp.html")
 
@@ -332,26 +570,44 @@ def verify_otp():
 # ---- RESET PASSWORD ----
 @app.route("/reset_password", methods=["GET", "POST"])
 def reset_password():
+    if (
+        "reset_email" not in session
+        or "reset_role" not in session
+        or not session.get("reset_verified")
+    ):
+        flash("Password reset session expired. Try again.", "danger")
+        return redirect(url_for("forgot_password"))
+
     if request.method == "POST":
         new_pass = request.form.get("password")
+        confirm = request.form.get("confirm_password")
 
-        email = session.get("reset_email")
-        role = session.get("reset_role")
+        if not new_pass or new_pass != confirm:
+            flash("Passwords do not match.", "danger")
+            return redirect(url_for("reset_password"))
 
+        email = session["reset_email"]
+        role = session["reset_role"]
         hashed = generate_password_hash(new_pass)
 
         if role == "admin":
             admin = Admin.query.filter_by(email=email).first()
-            admin.password = hashed
+            if admin:
+                admin.password = hashed
         else:
             emp = Employee.query.filter_by(email=email).first()
-            emp.password = hashed
+            if emp:
+                emp.password = hashed
 
         db.session.commit()
 
-        session.clear()
+        # clear reset session
+        session.pop("reset_email", None)
+        session.pop("reset_role", None)
+        session.pop("reset_otp", None)
+        session.pop("reset_verified", None)
 
-        flash("Password updated", "success")
+        flash("Password updated. Please login.", "success")
         return redirect(url_for("home"))
 
     return render_template("reset_password.html")
@@ -361,6 +617,7 @@ def reset_password():
 @app.route("/logout")
 def logout():
     session.clear()
+    flash("Logged out.", "info")
     return redirect(url_for("home"))
 
 
@@ -371,4 +628,5 @@ def uploads(filename):
 
 
 if __name__ == "__main__":
+    # don't call db.create_all() because tables already exist via SQL
     app.run(debug=True)
