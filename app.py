@@ -137,6 +137,7 @@ def send_otp_email(to_email: str, otp: str) -> bool:
     try:
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL("smtp.gmail.com", 587) as server:
+            server.starttls()
             server.login(EMAIL_USER, EMAIL_PASS)
             server.send_message(msg)
         return True
@@ -638,6 +639,7 @@ if __name__ == "__main__":
 
 with app.app_context():
     db.create_all()
+
 
 
 
