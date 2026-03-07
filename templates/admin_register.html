@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>Company Admin Registration</h2>
+
+    <form method="POST">
+        <input type="text" name="company_name" placeholder="Company Name" required>
+        <input type="text" name="admin_name" placeholder="Admin Name" required>
+        <input type="email" name="email" placeholder="Admin Email" required>
+        <input type="password" name="password" placeholder="Create Password" required>
+        <button type="submit">Register Company</button>
+    </form>
+
+    <br>
+    <a href="/">Back to Home</a>
+</div>
+{% endblock %}

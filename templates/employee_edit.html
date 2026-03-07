@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit My Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="page-wrap">
+    <div class="card">
+        <div class="title-main">Edit Profile</div>
+        <p class="subtitle">Update your personal and contact details.</p>
+
+        <div class="flash-area">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, msg in messages %}
+                  <div class="flash flash-{{ category }}">{{ msg }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" value="{{ emp.name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" name="phone" value="{{ emp.phone }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Alternate Phone</label>
+                    <input type="tel" name="alt_phone" value="{{ emp.alt_phone }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Relation of Alt Phone</label>
+                    {% set r = emp.alt_relation %}
+                    <select name="alt_relation">
+                        <option value="">Select</option>
+                        <option {% if r=='Father' %}selected{% endif %}>Father</option>
+                        <option {% if r=='Mother' %}selected{% endif %}>Mother</option>
+                        <option {% if r=='Brother' %}selected{% endif %}>Brother</option>
+                        <option {% if r=='Sister' %}selected{% endif %}>Sister</option>
+                        <option {% if r=='Spouse' %}selected{% endif %}>Spouse</option>
+                        <option {% if r=='Friend' %}selected{% endif %}>Friend</option>
+                        <option {% if r=='Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Marital Status</label>
+                    {% set m = emp.marital_status %}
+                    <select name="marital_status">
+                        <option value="">Select</option>
+                        <option {% if m=='Single' %}selected{% endif %}>Single</option>
+                        <option {% if m=='Married' %}selected{% endif %}>Married</option>
+                        <option {% if m=='Divorced' %}selected{% endif %}>Divorced</option>
+                        <option {% if m=='Widowed' %}selected{% endif %}>Widowed</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Blood Group</label>
+                    {% set b = emp.blood_group %}
+                    <select name="blood_group">
+                        <option value="">Select</option>
+                        {% for g in ['A+','A-','B+','B-','O+','O-','AB+','AB-'] %}
+                            <option {% if b==g %}selected{% endif %}>{{ g }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Gender</label>
+                    {% set g = emp.gender %}
+                    <select name="gender">
+                        <option value="">Select</option>
+                        <option {% if g=='Male' %}selected{% endif %}>Male</option>
+                        <option {% if g=='Female' %}selected{% endif %}>Female</option>
+                        <option {% if g=='Other' %}selected{% endif %}>Other</option>
+                        <option {% if g=='Prefer not to say' %}selected{% endif %}>Prefer not to say</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" name="city" value="{{ emp.city }}">
+                </div>
+
+                <div class="form-group">
+                    <label>State</label>
+                    <input type="text" name="state" value="{{ emp.state }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Address</label>
+                    <textarea name="address">{{ emp.address }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Photo (optional)</label>
+                    <input type="file" name="photo" accept="image/*">
+                </div>
+            </div>
+
+            <div class="btn-row" style="margin-top: 18px;">
+                <button class="btn btn-primary" type="submit">Save Changes</button>
+                <a class="btn btn-secondary" href="{{ url_for('employee_dashboard') }}">Back</a>
+            </div>
+        </form>
+
+        <div class="footer">
+            Created by <span>Gurudeep Soni</span> ✨
+        </div>
+    </div>
+</div>
+</body>
+</html>

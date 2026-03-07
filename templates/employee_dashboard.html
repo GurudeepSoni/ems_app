@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="page-wrap">
+    <div class="card">
+        <div class="top-bar">
+            <div>
+                <h2>Hello, {{ emp.name }} 👋</h2>
+                <p class="subtitle">Here are your profile details.</p>
+            </div>
+            <div class="btn-row">
+                <a class="btn btn-primary" href="{{ url_for('employee_edit') }}">Edit Profile</a>
+                <a class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </div>
+
+        <div class="flash-area">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, msg in messages %}
+                  <div class="flash flash-{{ category }}">{{ msg }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <tbody>
+                <tr>
+                    <th>Photo</th>
+                    <td>
+                        {% if emp.photo %}
+                            <img src="{{ url_for('uploads', filename=emp.photo) }}" class="avatar">
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr><th>Name</th><td>{{ emp.name }}</td></tr>
+                <tr><th>Email</th><td>{{ emp.email }}</td></tr>
+                <tr><th>Phone</th><td>{{ emp.phone }}</td></tr>
+                <tr><th>Alt Phone</th><td>{{ emp.alt_phone }}</td></tr>
+                <tr><th>Relation</th><td>{{ emp.alt_relation }}</td></tr>
+                <tr><th>Marital Status</th><td>{{ emp.marital_status }}</td></tr>
+                <tr><th>Blood Group</th><td>{{ emp.blood_group }}</td></tr>
+                <tr><th>Gender</th><td>{{ emp.gender }}</td></tr>
+                <tr><th>City</th><td>{{ emp.city }}</td></tr>
+                <tr><th>State</th><td>{{ emp.state }}</td></tr>
+                <tr><th>Address</th><td>{{ emp.address }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Created by <span>Gurudeep Soni</span> ✨
+        </div>
+    </div>
+</div>
+</body>
+</html>

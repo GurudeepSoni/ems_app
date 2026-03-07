@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Employee Register</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="container">
+  <header><h1>Employee Registration</h1></header>
+  <div class="card">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat,msg in messages %}
+          <div class="alert {{ 'alert-' + cat }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="post" enctype="multipart/form-data">
+      <label>Admin ID</label>
+      <input name="admin_id" required>
+      <label>Name</label>
+      <input name="name" required>
+      <label>Email</label>
+      <input name="email" type="email" required>
+      <label>Password</label>
+      <input name="password" type="password" required>
+      <label>Phone</label>
+      <input name="phone">
+      <label>Alt phone</label>
+      <input name="alt_phone">
+      <label>Relation</label>
+      <input name="alt_relation">
+      <label>Address</label>
+      <textarea name="address"></textarea>
+      <label>Photo</label>
+      <input type="file" name="photo">
+      <button class="btn" type="submit">Register</button>
+    </form>
+    <p><a href="{{ url_for('home') }}">Back to home</a></p>
+  </div>
+</body>
+</html>

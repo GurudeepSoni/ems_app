@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Company Created</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="page">
+  <div class="card center small">
+    <h2>Company Created ✅</h2>
+    <p>Admin Email: <strong>{{ company.admin_email }}</strong></p>
+    <p><strong>Important:</strong> This is the Admin ID for your company:</p>
+    <div class="code">{{ company.admin_id }}</div>
+    <p>Share this Admin ID with employees so they can register under your company.</p>
+    <a class="btn" href="{{ url_for('admin_login') }}">Login as Admin</a>
+    <a href="{{ url_for('home') }}">Home</a>
+  </div>
+</body>
+</html>

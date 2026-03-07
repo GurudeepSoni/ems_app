@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify OTP</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<div class="page-wrap">
+    <div class="card">
+
+        <div class="title-main">Verify OTP ✅</div>
+        <p class="subtitle">Enter the 6-digit OTP sent to your email.</p>
+
+        <div class="flash-area">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, msg in messages %}
+                  <div class="flash flash-{{ category }}">{{ msg }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        <form method="POST">
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label>OTP</label>
+                    <input type="text" name="otp" maxlength="6" required>
+                </div>
+
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn-primary" type="submit">Verify OTP</button>
+                <a class="btn btn-secondary" href="{{ url_for('forgot_password') }}">Resend / Change Email</a>
+            </div>
+        </form>
+
+        <div class="footer">
+            Created by <span>Gurudeep Soni</span> ✨
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

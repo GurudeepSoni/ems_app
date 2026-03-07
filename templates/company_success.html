@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Company Created</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="page-wrap">
+    <div class="card">
+
+        <div class="flash flash-success">
+            Company &amp; Admin created successfully!
+        </div>
+
+        <div class="title-main">Company Created Successfully</div>
+        <p class="subtitle">
+            Share the Admin ID below with your employees so they can register under this company.
+        </p>
+
+        <p><strong>Company Name:</strong> {{ admin.company_name }}</p>
+        <p><strong>Admin Name:</strong> {{ admin.name }}</p>
+        <p><strong>Admin Email:</strong> {{ admin.email }}</p>
+        <p style="margin-top: 14px;"><strong>Admin ID (share with employees):</strong>
+            <span style="font-family: monospace; font-size: 16px;">{{ admin_code }}</span>
+        </p>
+
+        <p class="helper" style="margin-top: 6px;">
+            Employees must type this Admin ID exactly during registration.
+        </p>
+
+        <div class="btn-row" style="margin-top: 18px;">
+            <a class="btn btn-primary" href="{{ url_for('admin_login') }}">Admin Login</a>
+            <a class="btn btn-secondary" href="{{ url_for('home') }}">Back Home</a>
+        </div>
+
+        <div class="footer">
+            Created by <span>Gurudeep Soni</span> ✨
+        </div>
+    </div>
+</div>
+</body>
+</html>

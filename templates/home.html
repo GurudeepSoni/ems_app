@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EMS – Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+<div class="page-wrap">
+    <div class="card">
+        <div class="title-main">Employee Management System</div>
+        <p class="subtitle">Global • Multi-Company • Simple</p>
+
+        <div class="flash-area">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, msg in messages %}
+                  <div class="flash flash-{{ category }}">{{ msg }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="home-grid">
+            <div class="home-card">
+                <h3>Admin Area</h3>
+                <p>Create a new company admin or log in as an existing admin.</p>
+                <div class="btn-row">
+                    <button class="btn btn-primary"
+                            onclick="window.location.href='{{ url_for('create_company') }}'">
+                        Create New Company
+                    </button>
+                    <button class="btn btn-secondary"
+                            onclick="window.location.href='{{ url_for('admin_login') }}'">
+                        Admin Login
+                    </button>
+                </div>
+            </div>
+
+            <div class="home-card">
+                <h3>Employee Portal</h3>
+                <p>Register under the correct Admin ID, then log in and manage your profile.</p>
+                <div class="btn-row">
+                    <button class="btn btn-primary"
+                            onclick="window.location.href='{{ url_for('employee_register') }}'">
+                        Employee Registration
+                    </button>
+                    <button class="btn btn-secondary"
+                            onclick="window.location.href='{{ url_for('employee_login') }}'">
+                        Employee Login
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Created by <span>Gurudeep Soni</span> ✨
+        </div>
+    </div>
+</div>
+</body>
+</html>
