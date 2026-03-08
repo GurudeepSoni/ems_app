@@ -128,26 +128,20 @@ def send_otp_email(to_email: str, otp: str) -> bool:
     msg["Subject"] = "EMS Password Reset OTP"
     msg["From"] = EMAIL_USER
     msg["To"] = to_email
-    msg.set_content(
-        f"Your OTP for resetting your EMS password is: {otp}\n\n"
-        "This code is valid for a short time."
-    )
+
+    msg.set_content(f"Your OTP is: {otp}")
 
     try:
-        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=15)
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=10) as server:
+            server.starttls()
+            server.login(EMAIL_USER, EMAIL_PASS)
+            server.send_message(msg)
 
-        server.login(EMAIL_USER, EMAIL_PASS)
-        server.send_message(msg)
-        server.quit()
-
-        print("OTP email sent successfully")
+        print("OTP sent successfully")
         return True
 
     except Exception as e:
-        print("Error sending email:", e)
+        print("Email error:", e)
         return False
 
 
@@ -644,6 +638,7 @@ if __name__ == "__main__":
 
 with app.app_context():
     db.create_all()
+
 
 
 
