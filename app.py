@@ -120,9 +120,8 @@ def generate_otp(length: int = 6) -> str:
 
 
 def send_otp_email(to_email: str, otp: str) -> bool:
-    """Send OTP email using Gmail SMTP."""
     if not EMAIL_USER or not EMAIL_PASS:
-        print("EMAIL_USER or EMAIL_PASS not set in .env")
+        print("EMAIL_USER or EMAIL_PASS not set")
         return False
 
     msg = EmailMessage()
@@ -131,16 +130,22 @@ def send_otp_email(to_email: str, otp: str) -> bool:
     msg["To"] = to_email
     msg.set_content(
         f"Your OTP for resetting your EMS password is: {otp}\n\n"
-        "This code is valid for a short time. If you did not request this, please ignore this email."
+        "This code is valid for a short time."
     )
 
     try:
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(EMAIL_USER, EMAIL_PASS)
-            server.send_message(msg)
+        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=15)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+
+        server.login(EMAIL_USER, EMAIL_PASS)
+        server.send_message(msg)
+        server.quit()
+
+        print("OTP email sent successfully")
         return True
+
     except Exception as e:
         print("Error sending email:", e)
         return False
@@ -639,6 +644,7 @@ if __name__ == "__main__":
 
 with app.app_context():
     db.create_all()
+
 
 
 
